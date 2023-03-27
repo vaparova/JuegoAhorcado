@@ -26,85 +26,90 @@
 </html>
 <script>
 
-    const $palabrAdivinar = ingresarPalabra();
-    let $arrCoincidencias = setCoincidencias($palabrAdivinar); // esto es para comparar
-    creaTablero($arrCoincidencias); // imprime el primer tablero
-
+    let arrCoincidencias = []; // esto es para corregir!
+    const palabrAdivinar = ingresarPalabra(arrCoincidencias);
 
     const letra = document.querySelector('input');
     letra.oninput = function(){
-        soloLetras(letra.value, $palabrAdivinar); // aca ver si esta funcion puede devolver el nuevo 
-        // de $arrCoincidencias, para luego reimprimir el tablero
+        soloLetras(letra.value, palabrAdivinar, arrCoincidencias);
     };
 
-    function ingresarPalabra(){
+    function setArrCoinc(arrPalabra, arrCoincidencias){
+        arrPalabra.forEach(letra => {
+            arrCoincidencias.push('');
+        });
+    }
+
+    function ingresarPalabra(arrCoincidencias){
         const palabra = prompt("Ingresa una palabra para adivinar!");
         const arrPalabra = palabra.split("");
+        setArrCoinc(arrPalabra,arrCoincidencias)
         console.log(arrPalabra);
-        return arrPalabra;
-    };
-
-    function setCoincidencias(palabrAdivinar){ //
-        const arrCoind = [];
-        palabrAdivinar.forEach( () => {
-            arrCoind.push("?");
-        });
-        return arrCoind;
-    }
-    
-    function creaTablero(arrCoincidencia){
-        let tablero = "";
-        arrCoincidencia.forEach(letra => {
-            tablero = tablero + "<td>"+ letra +" </td>";
-        });
-
         document.getElementById("tablero").innerHTML = `
             <table border="1">
                 <tr>
-                    ${tablero}    
+                    ${creaTablero(arrPalabra)}    
                 </tr>    
             </table>
         `;
+        return arrPalabra;
+    };
+
+    function creaTablero(arrPalabra){
+        let tablero = "";
+        arrPalabra.forEach(letra => {
+            tablero = tablero + "<td> ? </td>";
+        });
         return tablero;
     }
 
+    function modTablero(arrCoincidencias){
+        let tablero = "";
+        arrCoincidencias.forEach(letra => {
+            console.log(arrCoincidencias);
+            if(letra != ""){
+                tablero = tablero + "<td>"+ letra +" </td>";
+            }else{
+                tablero = tablero + "<td> ? </td>";
+            }
+        });
+        console.log(tablero)
+        return tablero;
+    }
 
     function soloLetras(cadena, palabrAdivinar){
         const pattern = new RegExp('[a-zA-Z]');
         console.log(pattern.test(cadena));
         if(!pattern.test(cadena)){
-            leyendaErr();
+            document.querySelector('input').value = "";
+            document.getElementById("status").innerHTML = "Solo puedes ingresar letras!!!..";
+            return false;
         }else{
             document.getElementById("tablero").innerHTML = `
             <table border="1">
                 <tr>
-                    ${buscarCoincidencia(cadena, palabrAdivinar)}    
+                    ${buscarCoincidencia(cadena,palabrAdivinar, arrCoincidencias)}    
                 </tr>    
             </table>
         `;
+            return true;
         }
     }
 
-    function buscarCoincidencia(letra, arrPalabra){
-        let tablero = "";
+    function buscarCoincidencia(letra, arrPalabra, arrCoincidencias){
         let coincidencias = 0;
-        let index = 0;
-        arrPalabra.forEach(caracter => {
+        let arrCoinc = arrCoincidencias;
+        let idx = 0;
+        arrPalabra.forEach((caracter, idx) => {
             if(caracter == letra){
-                tablero = tablero + "<td>"+ caracter +" </td>"; 
                 coincidencias = coincidencias + 1;
-            }else{
-                tablero = tablero + "<td> ? </td>";
+                arrCoinc[idx] = letra;
             }
-            index = index + 1;
             leyendaCoincidencia(coincidencias);
+            idx++;
         });
-        return tablero;
-    }
-
-    function leyendaErr(){
-        document.querySelector('input').value = "";
-        document.getElementById("status").innerHTML = "Solo puedes ingresar letras!!!..";
+        console.log(arrCoinc);
+        return modTablero(arrCoinc);
     }
 
     function leyendaCoincidencia(coincidencias){
@@ -114,7 +119,6 @@
             document.getElementById("status").innerHTML = `No hubo coinciencias :(`;
         }
     }
-
     
     
 </script>
